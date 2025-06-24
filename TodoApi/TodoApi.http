@@ -1,0 +1,47 @@
+﻿@TodoApi_HostAddress = https://localhost:7239
+
+GET {{TodoApi_HostAddress}}/
+
+###
+
+GET {{TodoApi_HostAddress}}/todoitems
+
+###
+
+POST {{TodoApi_HostAddress}}/todoitems
+
+###
+
+DELETE {{TodoApi_HostAddress}}/todoitems/{id}
+
+###
+
+GET {{TodoApi_HostAddress}}/todoitems/{id}
+
+###
+
+PUT {{TodoApi_HostAddress}}/todoitems/{id}
+
+###
+
+### Create a new product
+POST {{TodoApi_HostAddress}}/products
+Content-Type: application/json
+{
+  "name": "book",
+  "price": 5000,
+  "description": "A book about C#"
+}
+
+###
+
+### Update an existing product (replace 1 with the actual ProductId)
+PUT {{TodoApi_HostAddress}}/products/1
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "name": "updated book",
+  "price": 5500,
+  "description": "An updated book about C#"
+}
