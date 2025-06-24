@@ -3,6 +3,7 @@ using TodoApi.Data;
 using TodoApi.Models;
 using TodoApi.Repositories;
 using Serilog;
+using TodoApi.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -18,6 +19,8 @@ builder.Host.UseSerilog();
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
