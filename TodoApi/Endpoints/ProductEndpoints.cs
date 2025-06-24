@@ -1,40 +1,45 @@
 using Microsoft.AspNetCore.Builder;
 using TodoApi.Models;
 using TodoApi.Repositories;
+using TodoApi.Results;
 
 public static class ProductEndpoints
 {
     public static void MapProductEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/products", async (IProductRepository repo) =>
-            Results.Ok(await repo.GetAllAsync()));
+        {
+            var result = await repo.GetAllAsync();
+            return result.Success ? Results.Ok(result.Data) : Results.Problem(result.Error);
+        });
 
         app.MapGet("/products/{id}", async (int id, IProductRepository repo) =>
         {
-            var product = await repo.GetByIdAsync(id);
-            return product is not null ? Results.Ok(product) : Results.NotFound();
+            var result = await repo.GetByIdAsync(id);
+            return result.Success ? Results.Ok(result.Data) : Results.NotFound(result.Error);
         });
 
         app.MapPost("/products", async (Product product, IProductRepository repo) =>
         {
             if (product is null)
-            {
                 return Results.BadRequest("Product cannot be null.");
-            }
-            var created = await repo.AddAsync(product);
-            return Results.Created($"/products/{created.ProductId}", created);
+
+            var result = await repo.AddAsync(product);
+            return result.Success
+                ? Results.Created($"/products/{result.Data!.ProductId}", result.Data)
+                : Results.Problem(result.Error);
         });
 
         app.MapPut("/products/{id}", async (int id, Product product, IProductRepository repo) =>
         {
-            var updated = await repo.UpdateAsync(id, product);
-            return updated ? Results.NoContent() : Results.NotFound();
+            var result = await repo.UpdateAsync(id, product);
+            return result.Success ? Results.NoContent() : Results.NotFound(result.Error);
         });
 
         app.MapDelete("/products/{id}", async (int id, IProductRepository repo) =>
         {
-            var deleted = await repo.DeleteAsync(id);
-            return deleted ? Results.NoContent() : Results.NotFound();
+            var result = await repo.DeleteAsync(id);
+            return result.Success ? Results.NoContent() : Results.NotFound(result.Error);
         });
     }
 }

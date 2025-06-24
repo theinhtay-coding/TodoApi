@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using TodoApi.Models;
+using TodoApi.Results;
 
 namespace TodoApi.Repositories
 {
@@ -12,43 +13,49 @@ namespace TodoApi.Repositories
             _context = context;
         }
 
-        public async Task<List<Product>> GetAllAsync()
+        public async Task<Result<List<Product>>> GetAllAsync()
         {
-            return await _context.Products.ToListAsync();
+            var products = await _context.Products.ToListAsync();
+            return Result<List<Product>>.Ok(products);
         }
 
-        public async Task<Product?> GetByIdAsync(int id)
+        public async Task<Result<Product>> GetByIdAsync(int id)
         {
-            return await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
+            return product != null
+                ? Result<Product>.Ok(product)
+                : Result<Product>.Fail("Product not found.");
         }
 
-        public async Task<Product> AddAsync(Product product)
+        public async Task<Result<Product>> AddAsync(Product product)
         {
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return product;
+            return Result<Product>.Ok(product);
         }
 
-        public async Task<bool> UpdateAsync(int id, Product product)
+        public async Task<Result<bool>> UpdateAsync(int id, Product product)
         {
             var existing = await _context.Products.FindAsync(id);
-            if (existing == null) return false;
+            if (existing == null)
+                return Result<bool>.Fail("Product not found.");
 
             existing.Name = product.Name;
             existing.Price = product.Price;
             existing.Description = product.Description;
             await _context.SaveChangesAsync();
-            return true;
+            return Result<bool>.Ok(true);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<Result<bool>> DeleteAsync(int id)
         {
             var product = await _context.Products.FindAsync(id);
-            if (product == null) return false;
+            if (product == null)
+                return Result<bool>.Fail("Product not found.");
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-            return true;
+            return Result<bool>.Ok(true);
         }
     }
 }
