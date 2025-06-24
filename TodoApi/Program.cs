@@ -2,18 +2,25 @@ using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using TodoApi.Models;
 using TodoApi.Repositories;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    //.WriteTo.File($"Logs/log-{DateTime.Now:yyyyMMdd}.txt")
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
+
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-// Register ProductRepository
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
-// Global exception handling middleware
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -23,6 +30,7 @@ app.UseExceptionHandler(errorApp =>
         var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
         if (error != null)
         {
+            Log.Error(error.Error, "Unhandled exception occurred");
             var result = System.Text.Json.JsonSerializer.Serialize(new
             {
                 error = "An unexpected error occurred.",
@@ -33,12 +41,13 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", (ILogger<Program> logger) =>
+{
+    logger.LogInformation("Hello World endpoint was called.");
+    return "Hello World!";
+});
 
-// Register Todo endpoints
 app.MapTodoEndpoints();
-
-// Register Product endpoints
 app.MapProductEndpoints();
 
 app.Run();

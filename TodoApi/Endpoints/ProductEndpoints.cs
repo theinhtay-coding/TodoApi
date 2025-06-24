@@ -7,8 +7,11 @@ public static class ProductEndpoints
 {
     public static void MapProductEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/products", async (IProductRepository repo) =>
+        app.MapGet("/products", async (IProductRepository repo, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("ProductEndpoints");
+            logger.LogInformation("GET /products endpoint called.");
+
             var result = await repo.GetAllAsync();
             return result.Success ? Results.Ok(result.Data) : Results.Problem(result.Error);
         });
