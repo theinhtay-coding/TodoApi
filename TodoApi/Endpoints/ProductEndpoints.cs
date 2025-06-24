@@ -17,6 +17,10 @@ public static class ProductEndpoints
 
         app.MapPost("/products", async (Product product, IProductRepository repo) =>
         {
+            if (product is null)
+            {
+                return Results.BadRequest("Product cannot be null.");
+            }
             var created = await repo.AddAsync(product);
             return Results.Created($"/products/{created.ProductId}", created);
         });
