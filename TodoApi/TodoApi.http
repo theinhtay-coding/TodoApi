@@ -25,7 +25,7 @@ PUT {{TodoApi_HostAddress}}/todoitems/{id}
 ###
 
 ### Create a new product
-POST {{TodoApi_HostAddress}}/products
+POST {{TodoApi_HostAddress}}/api/products
 Content-Type: application/json
 {
   "name": "book",
@@ -36,7 +36,7 @@ Content-Type: application/json
 ###
 
 ### Update an existing product (replace 1 with the actual ProductId)
-PUT {{TodoApi_HostAddress}}/products/1
+PUT {{TodoApi_HostAddress}}/api/products/1
 Content-Type: application/json
 
 {

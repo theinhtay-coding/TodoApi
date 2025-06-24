@@ -5,9 +5,9 @@ using TodoApi.Results;
 
 public static class ProductEndpoints
 {
-    public static void MapProductEndpoints(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder MapProductEndpoints(this RouteGroupBuilder group)
     {
-        app.MapGet("/products", async (IProductRepository repo, ILoggerFactory loggerFactory) =>
+        group.MapGet("/", async (IProductRepository repo, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("ProductEndpoints");
             logger.LogInformation("GET /products endpoint called.");
@@ -16,13 +16,13 @@ public static class ProductEndpoints
             return result.Success ? Results.Ok(result.Data) : Results.Problem(result.Error);
         });
 
-        app.MapGet("/products/{id}", async (int id, IProductRepository repo) =>
+        group.MapGet("/{id:int}", async (int id, IProductRepository repo) =>
         {
             var result = await repo.GetByIdAsync(id);
             return result.Success ? Results.Ok(result.Data) : Results.NotFound(result.Error);
         });
 
-        app.MapPost("/products", async (Product product, IProductRepository repo) =>
+        group.MapPost("/", async (Product product, IProductRepository repo) =>
         {
             if (product is null)
                 return Results.BadRequest("Product cannot be null.");
@@ -33,16 +33,18 @@ public static class ProductEndpoints
                 : Results.Problem(result.Error);
         });
 
-        app.MapPut("/products/{id}", async (int id, Product product, IProductRepository repo) =>
+        group.MapPut("/{id:int}", async (int id, Product product, IProductRepository repo) =>
         {
             var result = await repo.UpdateAsync(id, product);
             return result.Success ? Results.NoContent() : Results.NotFound(result.Error);
         });
 
-        app.MapDelete("/products/{id}", async (int id, IProductRepository repo) =>
+        group.MapDelete("/{id:int}", async (int id, IProductRepository repo) =>
         {
             var result = await repo.DeleteAsync(id);
             return result.Success ? Results.NoContent() : Results.NotFound(result.Error);
         });
+
+        return group;
     }
 }

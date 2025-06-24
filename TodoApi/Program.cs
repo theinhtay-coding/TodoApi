@@ -48,6 +48,7 @@ app.MapGet("/", (ILogger<Program> logger) =>
 });
 
 app.MapTodoEndpoints();
-app.MapProductEndpoints();
+//app.MapProductEndpoints();
+app.MapGroup("/api/products").MapProductEndpoints();
 
 app.Run();
